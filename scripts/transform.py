@@ -1,6 +1,10 @@
+from datetime import datetime, timezone
+
 def transform(data):
     return {
-        "city": data["name"],
-        "temperature": data["main"]["temp"],
-        "weather": data["weather"][0]["description"]
+        "city": data.get("name"),
+        "temperature": data.get("main", {}).get("temp"),
+        "humidity": data.get("main", {}).get("humidity"),
+        "wind_speed": data.get("wind", {}).get("speed"),
+        "timestamp": datetime.now(timezone.utc)
     }

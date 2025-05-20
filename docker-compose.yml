@@ -5,9 +5,10 @@ services:
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_DB: weather
     volumes:
-      - postgres_db:/var/lib/postgresql/data
+      - ./pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   airflow-webserver:
     image: apache/airflow:2.9.0
@@ -15,8 +16,9 @@ services:
     depends_on:
       - postgres
     environment:
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/weather
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
     env_file:
       - .env
@@ -24,6 +26,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
+      - ./logs:/opt/airflow/logs
     ports:
       - "8080:8080"
     command: webserver
@@ -34,15 +37,19 @@ services:
     depends_on:
       - airflow-webserver
     environment:
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/weather
     env_file:
       - .env
     volumes:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
+      - ./logs:/opt/airflow/logs
     command: scheduler
 
 volumes:
   postgres_db:
+
+# http://localhost:8080/dags/weather_etl/grid?task_id=run_weather_etl&dag_run_id=scheduled__2025-05-19T00%3A00%3A00%2B00%3A00&tab=logs

@@ -1,13 +1,13 @@
 import os
 import requests
 
-def extract():
+def extract(city):
     api_key = os.getenv("OPENWEATHER_API_KEY")
     if not api_key:
         raise ValueError("OPENWEATHER_API_KEY not found in environment.")
 
     url = "http://api.openweathermap.org/data/2.5/weather"
-    params = {"q": "London", "appid": api_key, "units": "metric"}
+    params = {"q": city, "appid": api_key, "units": "metric"}
 
     response = requests.get(url, params=params)
 
