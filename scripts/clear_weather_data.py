@@ -5,7 +5,7 @@ def clear_weather_data():
         dbname="weather",
         user="airflow",
         password="airflow",
-        host="localhost",  # or your postgres host
+        host="localhost",
         port="5432"
     )
     cur = conn.cursor()
