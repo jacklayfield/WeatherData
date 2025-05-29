@@ -10,11 +10,15 @@ from scripts.extract import extract
 from scripts.transform import transform
 from scripts.load import load
 
-
 def run_etl():
-    raw = extract()
-    cleaned = transform(raw)
-    load(cleaned)
+    cities = ["Pittsburgh", "New York", "Chicago", "Los Angeles", "San Diego", 
+              "Boise", "Las Vegas", "Anchorage", "San Francisco", "Minneapolis", 
+              "Denver", "Seattle", "Atlanta", "Dallas", "Santiago", "Melbourne"]
+
+    for city in cities:
+        raw = extract(city=city, start_year=2023, end_year=2024)
+        cleaned = transform(raw)
+        load(cleaned)
 
 with DAG(
     dag_id="weather_etl",

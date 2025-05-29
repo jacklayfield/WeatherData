@@ -1,32 +1,33 @@
-import pandas as pd
 import psycopg2
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 
 conn = psycopg2.connect(
     dbname="weather",
     user="airflow",
     password="airflow",
-    host="localhost", 
+    host="localhost",
     port="5432"
 )
 
-query = """
-SELECT DISTINCT ON (city) city, temperature, humidity, wind_speed
-FROM weather_data
-ORDER BY city, timestamp DESC;
-"""
-
+query = "SELECT date, city, temperature_max FROM weather_data"
 df = pd.read_sql(query, conn)
 conn.close()
 
-df = df.dropna(subset=["city", "temperature", "humidity", "wind_speed"])
-df = df.set_index("city")
+df['date'] = pd.to_datetime(df['date']).dt.date
 
-# Plot heatmap
-plt.figure(figsize=(14, 10))
-sns.heatmap(df, annot=True, cmap="coolwarm", fmt=".1f", linewidths=0.5)
-plt.title("Weather Metrics Heatmap Across Cities", fontsize=16)
+pivot = df.pivot_table(index='city', columns='date', values='temperature_max')
+
+plt.figure(figsize=(14, 6))
+sns.heatmap(pivot, cmap='coolwarm', cbar_kws={'label': 'Max Temperature (°C)'})
+plt.title("Daily Max Temperature by City")
+plt.xlabel("Date")
+plt.ylabel("City")
 plt.tight_layout()
-plt.savefig("data/heatmap.png")
-plt.show()
+
+os.makedirs("data", exist_ok=True)
+output_path = os.path.join("data", "temperature_heatmap.png")
+plt.savefig(output_path)
+print(f"Heatmap saved to {output_path}")
