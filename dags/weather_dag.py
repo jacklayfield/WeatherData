@@ -13,7 +13,7 @@ from scripts.load import load
 def run_etl():
     cities = ["Pittsburgh", "New York", "Chicago", "Los Angeles", "San Diego", 
               "Boise", "Las Vegas", "Anchorage", "San Francisco", "Minneapolis", 
-              "Denver", "Seattle", "Atlanta", "Dallas", "Santiago", "Melbourne"]
+              "Denver", "Seattle", "Atlanta", "Dallas", "Melbourne"]
 
     for city in cities:
         raw = extract(city=city, start_year=2023, end_year=2024)
