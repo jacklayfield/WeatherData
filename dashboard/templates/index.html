@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weather Plot</title>
+  <script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
+</head>
+<body>
+  <div id="plot"></div>
+  <script>
+    async function fetchWeatherAndPlot() {
+      try {
+        const response = await fetch('/data');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("Expected data to be an array of city objects");
+        }
+
+        // Prepare Plotly traces for each city
+        const traces = data.map(cityData => {
+          const { city, dates, temps } = cityData;
+
+          if (!city || !dates || !temps) {
+            throw new Error("Missing required data fields in one of the city objects!");
+          }
+          if (dates.length !== temps.length) {
+            throw new Error(`Dates and temps array length mismatch for city: ${city}`);
+          }
+
+          return {
+            x: dates,
+            y: temps,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: city
+          };
+        });
+
+        const layout = {
+          title: 'Temperature Over Time for Multiple Cities',
+          xaxis: { title: 'Date' },
+          yaxis: { title: 'Temperature (°C)' }
+        };
+
+        Plotly.newPlot('plot', traces, layout);
+
+      } catch (error) {
+        console.error("Error fetching or plotting data:", error);
+        document.getElementById('plot').textContent = `Error: ${error.message}`;
+      }
+    }
+
+    fetchWeatherAndPlot();
+  </script>
+</body>
+</html>
