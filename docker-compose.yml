@@ -50,6 +50,17 @@ services:
       - ./logs:/opt/airflow/logs
     command: scheduler
 
+  weather-app:
+    build: ./weather_dashboard
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    environment:
+      - FLASK_ENV=development
+    volumes:
+      - ./weather_dashboard:/app
+
 volumes:
   postgres_db:
 
