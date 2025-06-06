@@ -6,51 +6,95 @@
   <script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
 </head>
 <body>
-  <div id="plot"></div>
+  <h2>Temperature Dashboard</h2>
+
+  <label for="cityDropdown">Select City:</label>
+  <select id="cityDropdown"></select>
+
+  <label for="unitToggle" style="margin-left: 20px;">Unit:</label>
+  <select id="unitToggle">
+    <option value="C">Celsius (°C)</option>
+    <option value="F">Fahrenheit (°F)</option>
+  </select>
+
+  <div id="plot" style="width: 100%; height: 600px;"></div>
+
   <script>
+    let cityData = [];
+    let currentUnit = 'C';
+
     async function fetchWeatherAndPlot() {
       try {
         const response = await fetch('/data');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Expected data to be an array of city objects");
 
-        if (!Array.isArray(data)) {
-          throw new Error("Expected data to be an array of city objects");
-        }
+        cityData = data;
 
-        // Prepare Plotly traces for each city
-        const traces = data.map(cityData => {
-          const { city, dates, temps } = cityData;
-
-          if (!city || !dates || !temps) {
-            throw new Error("Missing required data fields in one of the city objects!");
-          }
-          if (dates.length !== temps.length) {
-            throw new Error(`Dates and temps array length mismatch for city: ${city}`);
-          }
-
-          return {
-            x: dates,
-            y: temps,
-            type: 'scatter',
-            mode: 'lines+markers',
-            name: city
-          };
+        const cityDropdown = document.getElementById('cityDropdown');
+        cityDropdown.innerHTML = "";
+        cityData.forEach((cityObj, idx) => {
+          const option = document.createElement('option');
+          option.value = idx;
+          option.textContent = cityObj.city;
+          cityDropdown.appendChild(option);
         });
 
-        const layout = {
-          title: 'Temperature Over Time for Multiple Cities',
-          xaxis: { title: 'Date' },
-          yaxis: { title: 'Temperature (°C)' }
-        };
+        cityDropdown.addEventListener('change', () => updatePlot());
+        document.getElementById('unitToggle').addEventListener('change', (e) => {
+          currentUnit = e.target.value;
+          updatePlot();
+        });
 
-        Plotly.newPlot('plot', traces, layout);
+        updatePlot();
 
       } catch (error) {
         console.error("Error fetching or plotting data:", error);
         document.getElementById('plot').textContent = `Error: ${error.message}`;
       }
+    }
+
+    function updatePlot() {
+      const selectedIdx = document.getElementById('cityDropdown').value;
+      const cityObj = cityData[selectedIdx];
+      plotCityData(cityObj);
+    }
+
+    function convertTemps(temps, unit) {
+      return unit === 'F'
+        ? temps.map(c => c * 9 / 5 + 32)
+        : temps;
+    }
+
+    function plotCityData(cityObj) {
+      const { city, dates, temps } = cityObj;
+      const convertedTemps = convertTemps(temps, currentUnit);
+
+      const trace = {
+        x: dates,
+        y: convertedTemps,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: `${city} (${currentUnit === 'F' ? '°F' : '°C'})`,
+        line: { color: 'orange' },
+        marker: { color: 'orange' } 
+      };
+
+      const layout = {
+        title: `Temperature Over Time in ${city}`,
+        xaxis: {
+          title: 'Date',
+          rangeslider: { visible: true },
+          type: 'date'
+        },
+        yaxis: {
+          title: `Temperature (${currentUnit === 'F' ? '°F' : '°C'})`
+        }
+      };
+
+      Plotly.newPlot('plot', [trace], layout);
     }
 
     fetchWeatherAndPlot();

@@ -4,7 +4,6 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# Database connection settings
 DB_CONFIG = {
     "dbname": "weather",
     "user": "airflow",
