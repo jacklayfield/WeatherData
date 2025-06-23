@@ -1,5 +1,12 @@
 # WeatherData
-Simple data engineering project using weather data
+Simple data engineering / machine learning project using weather data
+
+## Stack
+
+- Airflow
+- Python (Scripting, flask)
+- Postgres
+- Docker
 
 ## General roadmap
 
