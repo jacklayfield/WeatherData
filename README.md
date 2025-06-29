@@ -17,5 +17,5 @@ Simple data engineering / machine learning project using weather data
 - [x] Use postgres db
 - [x] Create simple dashboard UI
 - [x] Implement ML pipeline (Temperature Forecasting)
-- [ ] Implement ML pipeline (Anomoly Detection) ADD: Isolation forests, seasonal decomposition
-- [ ] Implement ML pipeline (Clusters / Other)
+- [x] Implement ML pipeline (Anomoly Detection) ADD: Isolation forests, seasonal decomposition
+- [x] Implement ML pipeline (Clusters / Other)
